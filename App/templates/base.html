@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+
+    {% load static %}
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@100;200;300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
+
+    <script src="{% static 'js/base.js' %}"></script>
+</head>
+
+<body>
+
+    <!-- UNIVERSAL FIXED COMPONENTS -->
+    <div class="project-options">
+        <div onclick="handleProjectOptions(event)">Tasks</div>
+        <div onclick="handleProjectOptions(event)">Task Dependencies</div>
+        <div onclick="handleProjectOptions(event)">Settings</div>
+    </div>
+
+
+
+    <div class=" edit-user-info">
+        <form onsubmit="return false;">
+            {% csrf_token %}
+            <h1>Edit Profile</h1>
+            <div class="form-input">
+                <label class="form-label" for="id_first_name">First Name:</label>
+                <div class="input">
+                    <input type="text" name="first_name" placeholder="enter your first name" maxlength="20" required=""
+                        id="id_first_name" value="{{user_data.1}}" disabled>
+
+                    <input type="image" class="editbtn" onclick="handleUserInfoEdit(event)"
+                        src="{% static 'logos/edit.png' %}">
+                    <input type="button" class="saveUserInfoBtn" value="Save" onclick="handleUserInfoSave(event)">
+                </div>
+            </div>
+
+            <div class="form-input">
+
+                <label class="form-label" for="id_last_name">Last Name:</label>
+                <div class="input">
+                    <input type="text" name="last_name" placeholder="enter your last name" maxlength="20" required=""
+                        id="id_last_name" value="{{user_data.2}}" disabled>
+                    <input type="image" class="editbtn" onclick="handleUserInfoEdit(event)"
+                        src="{% static 'logos/edit.png' %}">
+                    <input type="button" class="saveUserInfoBtn" value="Save" onclick="handleUserInfoSave(event)">
+                </div>
+            </div>
+
+            <div class="form-input">
+
+                <label class="form-label" for="id_email">E-Mail:</label>
+                <div class="input">
+                    <input type="email" name="email" placeholder="enter your e-mail" required="" id="id_email"
+                        value="{{user_data.4}}" disabled>
+                    <input type="image" class="editbtn" onclick="handleUserInfoEdit(event)"
+                        src="{% static 'logos/edit.png' %}">
+                    <input type="button" class="saveUserInfoBtn" value="Save" onclick="handleUserInfoSave(event)">
+                </div>
+            </div>
+
+            <div class="form-input">
+
+                <label class="form-label" for="id_bio">Bio:</label>
+                <div class="input">
+                    <input type="text" name="bio" placeholder="enter your bio" required="" id="id_bio"
+                        value="{{user_data.6}}" disabled>
+                    <input type="image" class="editbtn" onclick="handleUserInfoEdit(event)"
+                        src="{% static 'logos/edit.png' %}">
+                    <input type="button" class="saveUserInfoBtn" value="Save" onclick="handleUserInfoSave(event)">
+                </div>
+            </div>
+
+            <div class="form-input image-container-wrapper">
+                <label class="form-label" for="image-container">Profile Picture:</label>
+
+                <div id="image-container">
+                    <img class="pPic" src="/media/profile_pics/{{user_data.5}}" alt="Profile Picture">
+                    <div>
+                        <input type="file" name="picture" accept="image/*" required="" id="id_picture">
+                        <button type="button" class="uploadBtn" onclick="handlePictureUpload(event)">Upload</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-input">
+                <button id='cngPassBtn' type='button' onclick="handleChangePass(event)">Change Password</button>
+            </div>
+
+            <div class="form-input" id="cngPass">
+                <input type="password" name="password" placeholder="enter password" required="" id="id_password">
+                <input type="button" value="Save" onclick="handleUserInfoSave(event)">
+            </div>
+
+            <div class="form-input">
+                <button id='delUserBtn' type='button' onclick="handleDeleteUser(event)">Delete Account</button>
+            </div>
+
+            <div id="editUserErrMsg"></div>
+
+        </form>
+    </div>
+
+
+    <div class="notifications">
+        {% for notification in notifications %}
+        <div class="noti" data-noti-id={{notification.0}}>
+            {% if notification.7 %}
+            <span class="bold">{{notification.9}} {{notification.10}}</span> has invited you to join <span
+                class="bold">{{notification.8}}</span>
+            <div><button data-noti-id={{notification.0}} class="yesBtn"
+                    onclick="handleAcceptInvite(event)">accept</button>
+                <button class="noBtn" data-noti-id={{notification.0}}
+                    onclick="handleRejectInvite(event)">reject</button>
+            </div>
+            <div class="smallfont">{{notification.11}}</div>
+            {% endif %}
+
+            {% if not notification.7 %}
+            <div>{{ notification.1 }}</div>
+            <div class="smallfont">{{notification.11}}</div>
+            {% endif %}
+
+        </div>
+        {% endfor %}
+    </div>
+
+
+
+    <!-- SideBar -->
+    <div class="sidebar-container">
+
+        <div class="main-logo">
+            <img src="{% static 'logos/logo.png' %}" alt="Rabo">
+        </div>
+
+        <div class="sidebar">
+            <div class="sidebar-item noticeboard">
+                <div>
+                    <img src="{% static 'logos/noticeboard.png' %}" alt="Notice Board Logo">
+                    Notice Board
+                </div>
+            </div>
+
+            <div class="create-project sidebar-item">
+                <form action="{% url 'createproject' %}">
+                    <button id="createProjBtn">
+                        <img src="{% static 'logos/new.png' %}" alt="New Board Logo">
+                        <div>New Board</div>
+                    </button>
+                </form>
+            </div>
+            <div class="sidebar-item">
+                {% for project in projects %}
+                <button data-project-id={{project.0}} class="project-btn" onclick="showProjectMenu(event)" id="project1"
+                    data-is-super={{project.4}}>
+                    {{project.1}}
+                </button>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="main-view-container">
+        <div class="top-bar">
+            <div class="notif">
+                <button onclick="handleNotiBtn(event)"><img src="{% static 'logos/notifications.png' %}"
+                        alt="Notifications"></button>
+            </div>
+
+            <div class="user-btn">
+                <button onclick="handleUserBtn(event)">
+                    <img src="{% static 'logos/user.png' %}" alt="User Picture"></button>
+            </div>
+
+            <div id="logout-btn">
+                <button type="button" onclick="handleLogout(event)">Log Out</button>
+            </div>
+
+
+
+        </div>
+        <div class="main-section">
+            {% block content %}
+            {% endblock %}
+        </div>
+    </div>
+
+</body>
+
+</html>
